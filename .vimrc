@@ -14,7 +14,6 @@ let &t_EI.="\e[2 q" "EI = NORMAL mode (ELSE)
 set clipboard=unnamedplus
 
 if &term =~ '^screen'
-    " tmux will send xterm-style keys when its xterm-keys option is on
     execute "set <xUp>=\e[1;*A"
     execute "set <xDown>=\e[1;*B"
     execute "set <xRight>=\e[1;*C"

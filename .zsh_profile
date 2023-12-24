@@ -1,0 +1,46 @@
+export PATH="$PATH:/usr/local/bin"
+# Add Visual Studio Code (code)
+export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+
+
+export XDG_CONFIG_HOME=$HOME/config
+VIM="nvim"
+
+die () {
+    echo >&2 "$@"
+    exit 1
+}
+
+addToPath() {
+    if [[ "$PATH" != *"$1"* ]]; then
+        export PATH=$PATH:$1
+    fi
+}
+
+addToPathFront() {
+    if [[ "$PATH" != *"$1"* ]]; then
+        export PATH=$1:$PATH
+    fi
+}
+
+catr() {
+    tail -n "+$1" $3 | head -n "$(($2 - $1 + 1))"
+}
+
+fcd() {
+    cd $(find ~/. -type d -print | fzf)
+}
+
+export CC="clang-12"
+export CXX="clang++-12"
+export PYTHONBREAKPOINT="pudb.set_trace"
+export GOPATH=$HOME/go
+export GIT_EDITOR=$VIM
+export DOTFILES=$HOME/config
+
+addToPathFront $HOME/.zig
+addToPathFront $HOME/.local/.npm-global/bin
+addToPathFront $HOME/.local/scripts
+addToPathFront $HOME/.local/bin
+addToPathFront $HOME/.local/go/bin
+addToPathFront $HOME/go/bin

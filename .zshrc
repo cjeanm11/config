@@ -100,3 +100,5 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+source ~/.zsh_profile

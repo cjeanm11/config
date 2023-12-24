@@ -46,4 +46,4 @@ addToPathFront $HOME/.local/go/bin
 addToPathFront $HOME/go/bin
 addToPathFront $HOME/bin/.local/scripts
 
-source /.bin/.local/fzf-cd.sh
+source ~/bin/.local/scripts/fzf-cd.sh

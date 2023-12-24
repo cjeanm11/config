@@ -25,13 +25,9 @@ fcd() {
     if [[ "$1" == "-l" || "$1" == "-ls" || "$1" == "-list" ]]; then # list
         list_bookmarks
     elif [[ "$1" == "-g" || "$1" == "-go" || "$1" == "-goto" ]]; then # goto to a bookmarked path
-        goto_bookmark
+        goto_bookmark "$2"
     elif [[ "$1" == "-add" || "$1" == "-a" ]]; then # add to bookmarks
-        if [ -z "$2" ]; then
-            echo "Usage: fcd add <directory>"
-        else
-            add_to_bookmarks "$2"
-        fi
+        add_to_bookmarks "$2"
     elif [[ "$1" == "-remove" || "$1" == "-r" || "$1" == "-rm" ]]; then # rm from bookmarks
         if [ -z "$2" ]; then
             echo "Usage: fcd remove <directory>"
@@ -69,6 +65,12 @@ fcd() {
 # Add a directory to bookmarks
 add_to_bookmarks() {
     local target_dir="$1"
+
+    # If target_dir is not provided, use the current directory (pwd)
+    if [ -z "$target_dir" ]; then
+        target_dir="$(pwd)"
+    fi
+
     local absolute_path=$(realpath "$target_dir" 2>/dev/null) # Resolve the absolute path
 
     if [[ -z "$absolute_path" || ! -d "$absolute_path" ]]; then
@@ -96,7 +98,7 @@ list_bookmarks() {
     echo "Bookmarked Directories:"
     for ((i = 0; i < $bookmark_count; i++)); do
         local bookmarked_dir="${bookmarks[i+1]}"
-        
+
         if [[ -d "$bookmarked_dir" ]]; then
             echo "  [$((i + 1))] - $bookmarked_dir"
         else
@@ -128,10 +130,14 @@ remove_from_bookmarks() {
 
 # Go to bookmark path based on input (bookmark numbers)
 goto_bookmark() {
-    list_bookmarks  # list bookmark numbers
+    local choice="$1"  # Get the bookmark number from the second arg
 
-    echo "Enter the number of the bookmarked path you want to navigate to: "
-    read -r choice
+    if [ -z "$choice" ]; then
+        list_bookmarks  # list bookmark numbers
+        echo "Enter the number of the bookmarked path you want to navigate to: "
+        read -r choice
+    fi
+
 
     if ! [[ "$choice" =~ ^[0-9]+$ ]]; then
         echo "Error: Please enter a valid number."
@@ -140,7 +146,7 @@ goto_bookmark() {
 
     local index=$((choice - 1))
 
-    # Valid the index 
+    # Valid the index
     if [[ $index -lt 0 || $index -ge ${#bookmarks[@]} ]]; then
         echo "Invalid choice. Please select a valid bookmark number."
         return 1
@@ -160,4 +166,3 @@ goto_bookmark() {
     }
     echo "Navigated to $(pwd)"
 }
-

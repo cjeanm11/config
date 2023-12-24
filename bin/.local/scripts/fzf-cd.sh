@@ -24,6 +24,8 @@ popd() {
 fcd() {
     if [[ "$1" == "-l" || "$1" == "-ls" || "$1" == "-list" ]]; then # list
         list_bookmarks
+    elif [[ "$1" == "-g" || "$1" == "-go" || "$1" == "-goto" ]]; then # goto to a bookmarked path
+        goto_bookmark
     elif [[ "$1" == "-add" || "$1" == "-a" ]]; then # add to bookmarks
         if [ -z "$2" ]; then
             echo "Usage: fcd add <directory>"
@@ -67,7 +69,18 @@ fcd() {
 # Add a directory to bookmarks
 add_to_bookmarks() {
     local target_dir="$1"
-    local absolute_path="$(realpath "$target_dir")"
+    local absolute_path=$(realpath "$target_dir" 2>/dev/null) # Resolve the absolute path
+
+    if [[ -z "$absolute_path" || ! -d "$absolute_path" ]]; then
+        echo "Error: Invalid directory: $target_dir"
+        return
+    fi
+
+    if [[ " ${bookmarks[@]} " =~ " $absolute_path " ]]; then
+        echo "Error: Directory is already in bookmarks: $absolute_path"
+        return
+    fi
+
     bookmarks+=("$absolute_path")
     echo "Added $absolute_path to bookmarks."
 }
@@ -77,19 +90,26 @@ list_bookmarks() {
     local bookmark_count=${#bookmarks[@]}
     if [ $bookmark_count -eq 0 ]; then
         echo "No bookmarks found."
-    else
-        echo "Bookmarked Directories:"
-        for dir in "${bookmarks[@]}"; do
-            echo "  $dir"
-        done
+        return
     fi
+
+    echo "Bookmarked Directories:"
+    for ((i = 0; i < $bookmark_count; i++)); do
+        local bookmarked_dir="${bookmarks[i+1]}"
+        
+        if [[ -d "$bookmarked_dir" ]]; then
+            echo "  [$((i + 1))] - $bookmarked_dir"
+        else
+            echo "  [$((i + 1))] - $bookmarked_dir (Invalid path)"
+        fi
+    done
 }
 
 
 # Remove a directory from bookmarks
 remove_from_bookmarks() {
     local target_dir="$1"
-    local absolute_path="$(realpath "$target_dir")"
+    local absolute_path=$(realpath "$target_dir" 2>/dev/null)
     local new_bookmarks=()
 
     for bookmark in "${bookmarks[@]}"; do
@@ -105,3 +125,39 @@ remove_from_bookmarks() {
         echo "Removed $absolute_path from bookmarks."
     fi
 }
+
+# Go to bookmark path based on input (bookmark numbers)
+goto_bookmark() {
+    list_bookmarks  # list bookmark numbers
+
+    echo "Enter the number of the bookmarked path you want to navigate to: "
+    read -r choice
+
+    if ! [[ "$choice" =~ ^[0-9]+$ ]]; then
+        echo "Error: Please enter a valid number."
+        return 1
+    fi
+
+    local index=$((choice - 1))
+
+    # Valid the index 
+    if [[ $index -lt 0 || $index -ge ${#bookmarks[@]} ]]; then
+        echo "Invalid choice. Please select a valid bookmark number."
+        return 1
+    fi
+
+    local selected_path="${bookmarks[index+1]}"
+    selected_path=$(eval echo "$selected_path")
+
+    if [[ ! -d "$selected_path" ]]; then
+        echo "Error: The selected bookmark is not a valid directory."
+        return 1
+    fi
+
+    cd "$selected_path" || {
+        echo "Error: Could not navigate to $selected_path"
+        return 1
+    }
+    echo "Navigated to $(pwd)"
+}
+

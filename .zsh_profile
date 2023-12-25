@@ -67,3 +67,7 @@ addToPath $HOME/.cargo/bin
 addToPath $HOME/.rustup
 
 source ./bin/.local/scripts/fzf-cd.sh
+
+fcd -a ~/code 1> /dev/null
+fcd -a ~/work 1> /dev/null
+fcd -a ~/personal 1> /dev/null

@@ -102,3 +102,8 @@ source $ZSH/oh-my-zsh.sh
 DISABLE_UNTRACKED_FILES_DIRTY="true"
 
 source ~/.zsh_profile
+
+if [ -z "$TMUX" ]
+then
+    tmux attach -t TMUX || tmux new -s TMUX
+fi

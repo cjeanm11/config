@@ -1,10 +1,14 @@
 export PATH="$PATH:/usr/local/bin"
-# Add Visual Studio Code (code)
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+export EDITOR='nvim'
+export CLICOLOR=1
 
-
-export XDG_CONFIG_HOME=$HOME/config
-VIM="nvim"
+alias vim="nvim"
+alias vi="nvim"
+alias python="python3"
+alias py="python3"
+alias work="cd ~/work"
+alias pers="cd ~/personal"
 
 die () {
     echo >&2 "$@"
@@ -27,15 +31,28 @@ catr() {
     tail -n "+$1" $3 | head -n "$(($2 - $1 + 1))"
 }
 
+cat1Line() {
+    cat $1 | tr -d "\n"
+}
+
 fcd() {
     cd $(find ~/. -type d -print | fzf)
+}
+
+validateYaml() {
+    python -c 'import yaml,sys;yaml.safe_load(sys.stdin)' < $1
+}
+
+eslintify() {
+    cat $1 > /tmp/file_to_eslint
+    npx eslint
 }
 
 export CC="clang-12"
 export CXX="clang++-12"
 export PYTHONBREAKPOINT="pudb.set_trace"
 export GOPATH=$HOME/go
-export GIT_EDITOR=$VIM
+export GIT_EDITOR="nvim"
 export DOTFILES=$HOME/config
 
 addToPathFront $HOME/.zig
@@ -45,5 +62,8 @@ addToPathFront $HOME/.local/bin
 addToPathFront $HOME/.local/go/bin
 addToPathFront $HOME/go/bin
 addToPathFront $HOME/bin/.local/scripts
+addToPath $HOME/.dev
+addToPath $HOME/.cargo/bin
+addToPath $HOME/.rustup
 
-source ~/bin/.local/scripts/fzf-cd.sh
+source ./bin/.local/scripts/fzf-cd.sh

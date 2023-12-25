@@ -1,27 +1,38 @@
 #!/bin/bash
 
-# install fzf if absent
-if ! command -v fzf &>/dev/null; then
-    echo "Installing fzf..."
-    if git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf; then
-        ~/.fzf/install --all
-        echo "fzf installed and set up."
-    else
-        echo "Failed to clone the fzf repository. Please check your internet connection and try again."
-    fi
-fi
+
+################# fcd function with options and behavior ####################
 
 declare -a directory_stack
 declare -a bookmarks
 
-# Push the current directory onto the stack
+# TAG --help: output brief documentation for how to invoke the program
+show_help() {
+    echo "Usage: fcd [OPTIONS] [PATH]"
+    echo "Navigate directories with fuzzy search and manage bookmarks."
+    echo ""
+    echo "Options:"
+    echo "  -l, -ls, -list       List all bookmarked directories."
+    echo "  -g, -go, -goto <NUM> Navigate to a bookmarked directory by number."
+    echo "  -a, -add <PATH>      Add the current directory or the specified PATH to bookmarks."
+    echo "                       If no argument is provided, the current directory is used."
+    echo "  -r, -rm, -remove <PATH>   Remove a specific bookmarked directory by PATH."
+    echo "  -r, -rm, -remove --all    Remove all bookmarks."
+    echo "  -push, -pu           Push the current directory onto the directory stack."
+    echo "  -pop, -pp            Pop and navigate to the top directory on the directory stack."
+    echo "  --help               Show this help message."
+    echo ""
+    echo "If no options or PATH is provided, fcd initiates fuzzy search to navigate interactively."
+}
+
+# OPTION -pu : Push the current directory onto the stack
 pushd() {
     local absolute_path="$(realpath "$PWD")"
     directory_stack+=("$absolute_path")
     cd "$1"
 }
 
-# Pop the top directory from the stack and navigate to it
+# OPTION -pp : Pop the top directory from the stack and navigate to it
 popd() {
     if [[ ${#directory_stack[@]} -gt 0 ]]; then
         local target_dir="${directory_stack[-1]}"
@@ -32,8 +43,12 @@ popd() {
     fi
 }
 
+# fzf-cd : Main function
 fcd() {
-    if [[ "$1" == "-l" || "$1" == "-ls" || "$1" == "-list" ]]; then # list
+    # Parse command line options
+    if [[ "$1" == "--help" || "$1" == "--h" ]]; then
+      show_help
+    elif [[ "$1" == "-l" || "$1" == "-ls" || "$1" == "-list" ]]; then # list
         list_bookmarks
     elif [[ "$1" == "-g" || "$1" == "-go" || "$1" == "-goto" ]]; then
         goto_bookmark "$2"
@@ -64,19 +79,23 @@ fcd() {
             echo "Directory stack is empty or an error occurred while popping."
         fi
     else
-        # fuzzy find and change dir.
-        local target_dir="$(find ~/. -type d -print | fzf)"
-        if [[ -n "$target_dir" ]]; then
-            pushd "$target_dir"
+        # default to cd if path is provided
+        if [[ -n "$1" ]]; then
+            cd "$1"
         else
-            echo "Invalid directory or command. Use '-ls' to list bookmarks, 'add' or '-a' to add a bookmark, 'remove' or '-r' to remove a bookmark."
-            return 1
+            local target_dir="$(find ~/. -type d -print | fzf)"
+            if [[ -n "$target_dir" ]]; then
+                pushd "$target_dir"
+            else
+                echo "Invalid directory or command. Use '-ls' to list bookmarks, 'add' or '-a' to add a bookmark, 'remove' or '-r' to remove a bookmark."
+                return 1
+            fi
         fi
     fi
 }
 
 
-# Add a directory to bookmarks
+# OPTION -a: Add a directory to bookmarks
 add_bookmark() {
     local target_dir="$1"
 
@@ -102,8 +121,9 @@ add_bookmark() {
 
     # TODO sanitize, check
     local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
-    shell_name="${shell_name#?}"
+    shell_name="${shell_name#-}"
     bm_to_add="fcd -a \"$absolute_path\" 1> /dev/null"
+    echo "${shell_name}"
     if ! grep "$bm_to_add" ~/.${shell_name}rc; then
         {
             chmod +w ~/.${shell_name}rc
@@ -114,8 +134,7 @@ add_bookmark() {
 
 }
 
-# List bookmarks
-
+# OPTION -l: List bookmarks
 list_bookmarks() {
     local bookmark_count=${#bookmarks[@]}
     if [[ $bookmark_count -eq 0 ]]; then
@@ -137,7 +156,7 @@ list_bookmarks() {
 }
 
 
-# Remove a directory from bookmarks
+# OPTION -r: Remove a directory from bookmarks
 # TODO remove as bookmark number instead of paths
 remove_bookmark() {
     local target_dir="$1"
@@ -155,7 +174,7 @@ remove_bookmark() {
     else
         bookmarks=("${new_bookmarks[@]}")
         local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
-        shell_name="${shell_name#?}"
+        shell_name="${shell_name#-}"
         bm_to_remove="fcd -a \"$absolute_path\""
         if grep "$bm_to_remove" ~/.${shell_name}rc 1>/dev/null; then
             {
@@ -173,7 +192,7 @@ remove_bookmark() {
     fi
 }
 
-# Go to bookmark path based on input (bookmark numbers)
+# OPTION -g: Go to bookmark path based on input (bookmark numbers)
 goto_bookmark() {
     local choice="$1"  # Get the bookmark number from the second arg
 
@@ -212,12 +231,12 @@ goto_bookmark() {
     echo "Navigated to $(pwd)"
 }
 
-# Clear all saved bookmark paths in .rc file
+# OPTION -r TAG --all: Remove bookmarks
 remove_all_bookmarks() {
     local option="$1"
     bookmarks=()
     local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
-    shell_name="${shell_name#?}"
+    shell_name="${shell_name#-}"
 
     if [[ -f ~/.${shell_name}rc ]]; then
         {
@@ -230,10 +249,14 @@ remove_all_bookmarks() {
             chmod -w ~/.${shell_name}rc
         }
     fi
+
     echo "All bookmarks removed."
 }
 
-# Custom clone : Change directory to git clone and then bookmark.
+
+################# custom git functions ####################
+
+# Custom git clone : Change directory to git clone and then bookmark.
 alias git='__git_custom_clone() {
     if [[ "$1" == "clone" ]]; then
         local clone_args=("$@")
@@ -242,7 +265,7 @@ alias git='__git_custom_clone() {
         cd "$(basename "${clone_args[-1]}" .git)"
         fcd -a
         local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
-        shell_name="${shell_name#?}"
+        shell_name="${shell_name#-}"
         bm_to_add="fcd -a \"$absolute_path\" 1> /dev/null"
         if ! grep "$bm_to_add" ~/.${shell_name}rc; then
             {

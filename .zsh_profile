@@ -1,19 +1,17 @@
 export PATH="$PATH:/usr/local/bin"
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
-export EDITOR='nvim'
+export EDITOR='vim'
 export CLICOLOR=1
+export CC="clang-12"
+export CXX="clang++-12"
+export PYTHONBREAKPOINT="pudb.set_trace"
+export GOPATH=$HOME/go
+export GIT_EDITOR="vim"
+export DOTFILES=$HOME/config
 
-alias vim="nvim"
-alias vi="nvim"
+alias vi="vim"
 alias python="python3"
 alias py="python3"
-alias work="cd ~/work"
-alias pers="cd ~/personal"
-
-die () {
-    echo >&2 "$@"
-    exit 1
-}
 
 addToPath() {
     if [[ "$PATH" != *"$1"* ]]; then
@@ -35,25 +33,9 @@ cat1Line() {
     cat $1 | tr -d "\n"
 }
 
-fcd() {
-    cd $(find ~/. -type d -print | fzf)
-}
-
 validateYaml() {
     python -c 'import yaml,sys;yaml.safe_load(sys.stdin)' < $1
 }
-
-eslintify() {
-    cat $1 > /tmp/file_to_eslint
-    npx eslint
-}
-
-export CC="clang-12"
-export CXX="clang++-12"
-export PYTHONBREAKPOINT="pudb.set_trace"
-export GOPATH=$HOME/go
-export GIT_EDITOR="nvim"
-export DOTFILES=$HOME/config
 
 addToPathFront $HOME/.zig
 addToPathFront $HOME/.local/.npm-global/bin
@@ -66,8 +48,7 @@ addToPath $HOME/.dev
 addToPath $HOME/.cargo/bin
 addToPath $HOME/.rustup
 
-source ./bin/.local/scripts/fzf-cd.sh
-
-fcd -a ~/code 1> /dev/null
-fcd -a ~/work 1> /dev/null
-fcd -a ~/personal 1> /dev/null
+source ~/.config/scripts/fzf-cd.sh
+source ~/.config/scripts/os_setup.sh
+source ~/.config/scripts/die.sh
+source ~/.config/scripts/clear_ram.sh

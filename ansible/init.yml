@@ -1,0 +1,86 @@
+- name: Bootstrap development environment
+  hosts: localhost
+  become: false
+  vars:
+    common_packages:
+      - git
+      - tmux
+      - make
+      - cmake
+      - nodejs
+      - npm
+      - curl
+      - lsof
+      - wget
+      - htop
+      - unzip
+      - zip
+      - vim
+      - golang
+      - ripgrep
+      - python3
+      - docker
+      - docker-compose
+      - fzf
+      - zsh
+      - jq
+      - nginx
+      - openssl
+
+  pre_tasks: []
+
+  tasks:
+    # --------------- Ubuntu ------------------
+    - name: Update and upgrade apt packages (Ubuntu)
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: dist
+      tags:
+        - Ubuntu
+      when: ansible_distribution == "Ubuntu"
+    - name: Install packages with apt (Ubuntu)
+      ansible.builtin.apt:
+        name: "{{ common_packages }}"
+        state: present
+      tags:
+        - Ubuntu
+      when: ansible_distribution == "Ubuntu"
+      register: package_result
+
+    # --------------- MacOSX ------------------
+    - name: Ensure Homebrew is installed (MacOSX)
+      ansible.builtin.shell: |
+        if ! command -v brew &> /dev/null; then
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        fi
+      tags:
+        - MacOSX
+      when: ansible_distribution == "MacOSX"
+
+    - name: Install packages with Homebrew (MacOSX)
+      ansible.builtin.homebrew:
+        name: "{{ common_packages }}"
+        state: present
+      when: ansible_distribution == "MacOSX"
+      tags:
+        - MacOSX
+      register: package_result_mac
+
+    # --------------- Display -----------------
+    - name: Display package installation results (Ubuntu)
+      debug:
+        msg: |
+          Package installation result (Ubuntu):
+          {{ package_result }}
+      tags:
+        - Ubuntu
+      when: ansible_distribution == "Ubuntu" and package_result is defined
+
+    - name: Display package installation results (MacOSX)
+      debug:
+        msg: |
+          Package installation result (MacOSX):
+          {{ package_result_mac }}
+      tags:
+        - MacOSX
+      when: ansible_distribution == "MaxOSX" and package_result_mac is defined

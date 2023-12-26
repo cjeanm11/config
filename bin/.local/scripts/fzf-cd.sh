@@ -40,7 +40,10 @@ fcd() {
     elif [[ "$1" == "-add" || "$1" == "-a" ]]; then
         add_bookmark "$2"
     elif [[ "$1" == "-remove" || "$1" == "-r" || "$1" == "-rm" ]]; then
-        if [[ -z "$2" ]]; then
+
+        if [[ "$2" == "--all" ]]; then
+            remove_all_bookmarks
+        elif [[ -z "$2" ]]; then
             echo "Usage: fcd remove <directory-path>"
             if [[ ! ${#bookmarks[@]} -eq 0 ]]; then
                 list_bookmarks
@@ -207,6 +210,27 @@ goto_bookmark() {
         return 1
     }
     echo "Navigated to $(pwd)"
+}
+
+# Clear all saved bookmark paths in .rc file
+remove_all_bookmarks() {
+    local option="$1"
+    bookmarks=()
+    local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
+    shell_name="${shell_name#?}"
+
+    if [[ -f ~/.${shell_name}rc ]]; then
+        {
+            chmod +w ~/.${shell_name}rc
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                sed -i '' "\#fcd -a#d" ~/.${shell_name}rc 1>/dev/null
+            else
+                sed -i "\#fcd -a#d" ~/.${shell_name}rc 1>/dev/null
+            fi
+            chmod -w ~/.${shell_name}rc
+        }
+    fi
+    echo "All bookmarks removed."
 }
 
 # Custom clone : Change directory to git clone and then bookmark.

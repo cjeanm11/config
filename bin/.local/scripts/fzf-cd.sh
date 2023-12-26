@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# install fzf if absent
+if ! command -v fzf &>/dev/null; then
+    echo "Installing fzf..."
+    if git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf; then
+        ~/.fzf/install --all
+        echo "fzf installed and set up."
+    else
+        echo "Failed to clone the fzf repository. Please check your internet connection and try again."
+    fi
+fi
+
 declare -a directory_stack
 declare -a bookmarks
 
@@ -12,7 +23,7 @@ pushd() {
 
 # Pop the top directory from the stack and navigate to it
 popd() {
-    if [ ${#directory_stack[@]} -gt 0 ]; then
+    if [[ ${#directory_stack[@]} -gt 0 ]]; then
         local target_dir="${directory_stack[-1]}"
         directory_stack=("${directory_stack[@]:0:(${#directory_stack[@]}-1)}")
         cd "$target_dir"
@@ -24,18 +35,18 @@ popd() {
 fcd() {
     if [[ "$1" == "-l" || "$1" == "-ls" || "$1" == "-list" ]]; then # list
         list_bookmarks
-    elif [[ "$1" == "-g" || "$1" == "-go" || "$1" == "-goto" ]]; then # goto to a bookmarked path
+    elif [[ "$1" == "-g" || "$1" == "-go" || "$1" == "-goto" ]]; then
         goto_bookmark "$2"
-    elif [[ "$1" == "-add" || "$1" == "-a" ]]; then # add to bookmarks
-        add_to_bookmarks "$2"
-    elif [[ "$1" == "-remove" || "$1" == "-r" || "$1" == "-rm" ]]; then # rm from bookmarks
-        if [ -z "$2" ]; then
-            echo "Usage: fcd remove <directory>"
-            if [ ! ${#bookmarks[@]} -eq 0 ]; then
+    elif [[ "$1" == "-add" || "$1" == "-a" ]]; then
+        add_bookmark "$2"
+    elif [[ "$1" == "-remove" || "$1" == "-r" || "$1" == "-rm" ]]; then
+        if [[ -z "$2" ]]; then
+            echo "Usage: fcd remove <directory-path>"
+            if [[ ! ${#bookmarks[@]} -eq 0 ]]; then
                 list_bookmarks
             fi
         else
-            remove_from_bookmarks "$2"
+            remove_bookmark "$2"
         fi
     elif [[ "$1" == "-push" || "$1" == "-pu" ]]; then # add to dir. stack
         if pushd "$PWD"; then
@@ -52,10 +63,10 @@ fcd() {
     else
         # fuzzy find and change dir.
         local target_dir="$(find ~/. -type d -print | fzf)"
-        if [ -n "$target_dir" ]; then
+        if [[ -n "$target_dir" ]]; then
             pushd "$target_dir"
         else
-            echo "Invalid directory or command. Use 'ls' to list bookmarks, 'add' or 'a' to add a bookmark, 'remove' or 'r' to remove a bookmark."
+            echo "Invalid directory or command. Use '-ls' to list bookmarks, 'add' or '-a' to add a bookmark, 'remove' or '-r' to remove a bookmark."
             return 1
         fi
     fi
@@ -63,11 +74,11 @@ fcd() {
 
 
 # Add a directory to bookmarks
-add_to_bookmarks() {
+add_bookmark() {
     local target_dir="$1"
 
     # If target_dir is not provided, use the current directory (pwd)
-    if [ -z "$target_dir" ]; then
+    if [[ -z "$target_dir" ]]; then
         target_dir="$(pwd)"
     fi
 
@@ -85,12 +96,26 @@ add_to_bookmarks() {
 
     bookmarks+=("$absolute_path")
     echo "Added $absolute_path to bookmarks."
+
+    # TODO sanitize, check
+    local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
+    shell_name="${shell_name#?}"
+    bm_to_add="fcd -a \"$absolute_path\" 1> /dev/null"
+    if ! grep "$bm_to_add" ~/.${shell_name}rc; then
+        {
+            chmod +w ~/.${shell_name}rc
+            echo "$bm_to_add" >> ~/.${shell_name}rc
+            chmod -w ~/.${shell_name}rc
+        }
+    fi
+
 }
 
 # List bookmarks
+
 list_bookmarks() {
     local bookmark_count=${#bookmarks[@]}
-    if [ $bookmark_count -eq 0 ]; then
+    if [[ $bookmark_count -eq 0 ]]; then
         echo "No bookmarks found."
         return
     fi
@@ -102,6 +127,7 @@ list_bookmarks() {
         if [[ -d "$bookmarked_dir" ]]; then
             echo "  [$((i + 1))] - $bookmarked_dir"
         else
+            # TODO if path happens to be invalid remove them from bm list and rc file.
             echo "  [$((i + 1))] - $bookmarked_dir (Invalid path)"
         fi
     done
@@ -109,22 +135,38 @@ list_bookmarks() {
 
 
 # Remove a directory from bookmarks
-remove_from_bookmarks() {
+# TODO remove as bookmark number instead of paths
+remove_bookmark() {
     local target_dir="$1"
     local absolute_path=$(realpath "$target_dir" 2>/dev/null)
     local new_bookmarks=()
 
-    for bookmark in "${bookmarks[@]}"; do
-        if [[ "$bookmark" != "$absolute_path" ]]; then
-            new_bookmarks+=("$bookmark")
+    for bm in "${bookmarks[@]}"; do
+        if [[ "$bm" != "$absolute_path" ]]; then
+            new_bookmarks+=("$bm")
         fi
     done
 
-    if [ ${#new_bookmarks[@]} -eq ${#bookmarks[@]} ]; then
-        echo "Directory $absolute_path is not in bookmarks."
+    if [[ ${#new_bookmarks[@]} -eq ${#bookmarks[@]} ]]; then
+        echo "Directory $absolute_path is not a bookmark."
     else
         bookmarks=("${new_bookmarks[@]}")
-        echo "Removed $absolute_path from bookmarks."
+        local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
+        shell_name="${shell_name#?}"
+        bm_to_remove="fcd -a \"$absolute_path\""
+        if grep "$bm_to_remove" ~/.${shell_name}rc 1>/dev/null; then
+            {
+                chmod +w ~/.${shell_name}rc
+                if [[ "$OSTYPE" == "darwin"* ]]; then
+                    sed -i '' "\#${bm_to_remove}#d" ~/.${shell_name}rc 1>/dev/null
+                else
+                    sed -i "\#${bm_to_remove}#d" ~/.${shell_name}rc 1>/dev/null
+                fi
+                chmod -w ~/.${shell_name}rc
+                echo "Removed $absolute_path from bookmarks."
+            }
+        fi
+        #
     fi
 }
 
@@ -132,7 +174,7 @@ remove_from_bookmarks() {
 goto_bookmark() {
     local choice="$1"  # Get the bookmark number from the second arg
 
-    if [ -z "$choice" ]; then
+    if [[ -z "$choice" ]]; then
         list_bookmarks  # list bookmark numbers
         echo "Enter the number of the bookmarked path you want to navigate to: "
         read -r choice
@@ -166,3 +208,26 @@ goto_bookmark() {
     }
     echo "Navigated to $(pwd)"
 }
+
+# Custom clone : Change directory to git clone and then bookmark.
+alias git='__git_custom_clone() {
+    if [[ "$1" == "clone" ]]; then
+        local clone_args=("$@")
+        git clone "$2" &
+        wait
+        cd "$(basename "${clone_args[-1]}" .git)"
+        fcd -a
+        local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
+        shell_name="${shell_name#?}"
+        bm_to_add="fcd -a \"$absolute_path\" 1> /dev/null"
+        if ! grep "$bm_to_add" ~/.${shell_name}rc; then
+            {
+                chmod +w ~/.${shell_name}rc
+                echo "$bm_to_add" >> ~/.${shell_name}rc
+                chmod -w ~/.${shell_name}rc
+            }
+        fi
+    else
+        command git "$@"
+    fi
+}; __git_custom_clone 1> /dev/null'

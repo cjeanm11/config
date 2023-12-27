@@ -1,10 +1,9 @@
 export PATH="$PATH:/usr/local/bin"
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
-export EDITOR='nvim'
+export EDITOR='vim'
 export CLICOLOR=1
 
-alias vim="nvim"
-alias vi="nvim"
+alias vi="vim"
 alias python="python3"
 alias py="python3"
 alias work="cd ~/work"
@@ -35,10 +34,6 @@ cat1Line() {
     cat $1 | tr -d "\n"
 }
 
-fcd() {
-    cd $(find ~/. -type d -print | fzf)
-}
-
 validateYaml() {
     python -c 'import yaml,sys;yaml.safe_load(sys.stdin)' < $1
 }
@@ -52,7 +47,7 @@ export CC="clang-12"
 export CXX="clang++-12"
 export PYTHONBREAKPOINT="pudb.set_trace"
 export GOPATH=$HOME/go
-export GIT_EDITOR="nvim"
+export GIT_EDITOR="vim"
 export DOTFILES=$HOME/config
 
 addToPathFront $HOME/.zig

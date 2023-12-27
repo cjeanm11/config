@@ -134,8 +134,9 @@ add_bookmark() {
 
     # TODO sanitize, check
     local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
-    shell_name="${shell_name#?}"
+    shell_name="${shell_name#-}"
     bm_to_add="fcd -a \"$absolute_path\" 1> /dev/null"
+    echo "${shell_name}"
     if ! grep "$bm_to_add" ~/.${shell_name}rc; then
         {
             chmod +w ~/.${shell_name}rc
@@ -186,7 +187,7 @@ remove_bookmark() {
     else
         bookmarks=("${new_bookmarks[@]}")
         local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
-        shell_name="${shell_name#?}"
+        shell_name="${shell_name#-}"
         bm_to_remove="fcd -a \"$absolute_path\""
         if grep "$bm_to_remove" ~/.${shell_name}rc 1>/dev/null; then
             {
@@ -248,7 +249,7 @@ remove_all_bookmarks() {
     local option="$1"
     bookmarks=()
     local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
-    shell_name="${shell_name#?}"
+    shell_name="${shell_name#-}"
 
     if [[ -f ~/.${shell_name}rc ]]; then
         {
@@ -277,7 +278,7 @@ alias git='__git_custom_clone() {
         cd "$(basename "${clone_args[-1]}" .git)"
         fcd -a
         local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
-        shell_name="${shell_name#?}"
+        shell_name="${shell_name#-}"
         bm_to_add="fcd -a \"$absolute_path\" 1> /dev/null"
         if ! grep "$bm_to_add" ~/.${shell_name}rc; then
             {

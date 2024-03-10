@@ -1,0 +1,30 @@
+[
+  {
+    "context": "Terminal",
+    "bindings": {
+      "cmd-2": "workspace::ToggleBottomDock"
+    }
+  },
+  {
+    "context": "Workspace && mode == full",
+    "bindings": {
+      "cmd-1": "workspace::ToggleLeftDock",
+      "cmd-2": "terminal_panel::ToggleFocus"
+    }
+  },
+  {
+    "context": "Workspace && mode != full",
+    "bindings": {
+      "cmd-1": "project_panel::ToggleFocus",
+      "cmd-2": "terminal_panel::ToggleFocus"
+    }
+  },
+  {
+    "context": "ProjectPanel && mode != full",
+    "bindings": {
+      "cmd-1": "workspace::ToggleLeftDock",
+      "cmd-2": "terminal_panel::ToggleFocus",
+      "/": "file_finder::Toggle"
+    }
+  }
+]

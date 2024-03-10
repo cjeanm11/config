@@ -1,18 +1,5 @@
 #!/bin/bash
 
-################# setup deps ####################
-
-# install fzf if absent
-if ! command -v fzf &>/dev/null; then
-    echo "Installing fzf..."
-    if git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf; then
-        ~/.fzf/install --all
-        echo "fzf installed and set up."
-    else
-        echo "Failed to clone the fzf repository. Please check your internet connection and try again."
-    fi
-fi
-
 
 ################# fcd function with options and behavior ####################
 

@@ -2,8 +2,9 @@ export PATH="$PATH:/usr/local/bin"
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 export EDITOR='vim'
 export CLICOLOR=1
-
-alias vi="vim"
+alias nvim="nvim"
+alias vi="nvim"
+alias oldvim="vim"
 alias python="python3"
 alias py="python3"
 alias work="cd ~/work"

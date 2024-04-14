@@ -1,0 +1,29 @@
+{"signed_in":false,"type":"Setting","setting":"theme","value":"One Light","milliseconds_since_first_event":0}
+{"signed_in":false,"type":"Setting","setting":"keymap","value":"JetBrains","milliseconds_since_first_event":0}
+{"signed_in":false,"type":"App","operation":"open","milliseconds_since_first_event":0}
+{"signed_in":false,"type":"Editor","operation":"open","file_extension":null,"vim_mode":true,"copilot_enabled":true,"copilot_enabled_for_language":true,"milliseconds_since_first_event":0}
+{"signed_in":false,"type":"App","operation":"open project","milliseconds_since_first_event":39331}
+{"signed_in":false,"type":"Setting","setting":"theme","value":"Sandcastle","milliseconds_since_first_event":67413}
+{"signed_in":false,"type":"Edit","duration":16032,"environment":"terminal","milliseconds_since_first_event":90803}
+{"signed_in":false,"type":"Action","source":"command palette","action":"zed: open keymap","milliseconds_since_first_event":103308}
+{"signed_in":false,"type":"Editor","operation":"open","file_extension":"json","vim_mode":true,"copilot_enabled":true,"copilot_enabled_for_language":true,"milliseconds_since_first_event":103337}
+{"signed_in":false,"type":"Action","source":"command palette","action":"zed: open default keymap","milliseconds_since_first_event":112830}
+{"signed_in":false,"type":"Editor","operation":"open","file_extension":null,"vim_mode":true,"copilot_enabled":true,"copilot_enabled_for_language":true,"milliseconds_since_first_event":112854}
+{"signed_in":false,"type":"Editor","operation":"open","file_extension":null,"vim_mode":true,"copilot_enabled":true,"copilot_enabled_for_language":true,"milliseconds_since_first_event":148218}
+{"signed_in":false,"type":"App","operation":"project search: open","milliseconds_since_first_event":148218}
+{"signed_in":false,"type":"Edit","duration":644,"environment":"editor","milliseconds_since_first_event":233109}
+{"signed_in":false,"type":"Memory","memory_in_bytes":131743744,"virtual_memory_in_bytes":420188389376,"milliseconds_since_first_event":239914}
+{"signed_in":false,"type":"Cpu","usage_as_percentage":9.690086,"core_count":8,"milliseconds_since_first_event":239914}
+{"signed_in":false,"type":"Edit","duration":8499,"environment":"editor","milliseconds_since_first_event":266802}
+{"signed_in":false,"type":"Editor","operation":"save","file_extension":null,"vim_mode":true,"copilot_enabled":true,"copilot_enabled_for_language":true,"milliseconds_since_first_event":0}
+{"signed_in":false,"type":"Edit","duration":32042,"environment":"editor","milliseconds_since_first_event":17612}
+{"signed_in":false,"type":"Editor","operation":"save","file_extension":"json","vim_mode":true,"copilot_enabled":true,"copilot_enabled_for_language":true,"milliseconds_since_first_event":21467}
+{"signed_in":false,"type":"Edit","duration":3881,"environment":"editor","milliseconds_since_first_event":93061}
+{"signed_in":false,"type":"Editor","operation":"save","file_extension":"json","vim_mode":true,"copilot_enabled":true,"copilot_enabled_for_language":true,"milliseconds_since_first_event":110123}
+{"signed_in":false,"type":"Editor","operation":"open","file_extension":null,"vim_mode":true,"copilot_enabled":false,"copilot_enabled_for_language":true,"milliseconds_since_first_event":131929}
+{"signed_in":false,"type":"Memory","memory_in_bytes":131432448,"virtual_memory_in_bytes":420171218944,"milliseconds_since_first_event":172587}
+{"signed_in":false,"type":"Cpu","usage_as_percentage":9.798773,"core_count":8,"milliseconds_since_first_event":172587}
+{"signed_in":false,"type":"Action","source":"command palette","action":"workspace: new file","milliseconds_since_first_event":174415}
+{"signed_in":false,"type":"Editor","operation":"open","file_extension":null,"vim_mode":true,"copilot_enabled":false,"copilot_enabled_for_language":true,"milliseconds_since_first_event":174425}
+{"signed_in":false,"type":"Edit","duration":12401,"environment":"editor","milliseconds_since_first_event":175494}
+{"signed_in":false,"type":"Edit","duration":37728,"environment":"editor","milliseconds_since_first_event":235318}

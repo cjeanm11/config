@@ -62,6 +62,7 @@ addToPath $HOME/.cargo/bin
 addToPath $HOME/.rustup
 
 source ~/bin/.local/scripts/fzf-cd.sh
+source ~/bin/.local/scripts/die.sh
 
 fcd -a ~/code 1> /dev/null
 fcd -a ~/work 1> /dev/null

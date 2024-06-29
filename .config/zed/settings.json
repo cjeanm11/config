@@ -1,4 +1,7 @@
-{
+{ 
+  "features": {
+    "inline_completion_provider": "none"
+  },
   "telemetry": {
     "diagnostics": false,
     "metrics": false
@@ -19,7 +22,7 @@
     "option_as_meta": false,
     "button": false,
     "toolbar": {
-      "title": true
+      "title": false
     },
     "working_directory": "current_project_directory"
   }

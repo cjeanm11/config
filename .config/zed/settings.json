@@ -3,8 +3,20 @@
     "diagnostics": false,
     "metrics": false
   },
+  "cursor_blink": false,
   "autosave": "on_focus_change",
   "vim_mode": true,
   "ui_font_size": 16,
-  "buffer_font_size": 16
+  "buffer_font_size": 16,
+  "terminal": {
+    "alternate_scroll": "off",
+    "blinking": "terminal_controlled",
+    "copy_on_select": false,
+    "option_as_meta": false,
+    "button": false,
+    "toolbar": {
+      "title": true
+    },
+    "working_directory": "current_project_directory"
+  }
 }

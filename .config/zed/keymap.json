@@ -23,7 +23,8 @@
     "context": "ProjectPanel && mode != full",
     "bindings": {
       "cmd-1": "workspace::ToggleLeftDock",
-      "cmd-2": "terminal_panel::ToggleFocus"
+      "cmd-2": "terminal_panel::ToggleFocus",
+      "/": "file_finder::Toggle"
     }
   }
 ]

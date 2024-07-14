@@ -1,0 +1,37 @@
+---
+- name: Bootstrap development environment
+  hosts: localhost
+  become: false  
+  vars:
+    common_packages:
+      - git
+      - tmux
+      - make
+      - cmake
+      - nodejs
+      - npm
+      - curl
+      - wget
+      - htop
+      - unzip
+      - zip
+      - go
+  tasks:
+    - name: Install packages with apt on Ubuntu
+      ansible.builtin.apt:
+        name: "{{ common_packagesq }}"
+        state: present
+      when: ansible_distribution == "Ubuntu"
+      register: package_result
+    - name: Install common packages with brew on MacOS
+      homebrew:
+        name: "{{ common_packages }}"
+        state: present
+      when: ansible_distribution == "MacOSX"
+      register: package_result
+    - name: Display package installation results
+      debug:
+        msg: |
+          Package installation result:
+          {{ package_result }}
+      when: package_result is defined

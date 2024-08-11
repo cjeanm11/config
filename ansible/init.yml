@@ -5,18 +5,33 @@
   become: false  
   vars:
     common_packages:
-      - git
-      - tmux
-      - make
-      - cmake
-      - nodejs
-      - npm
+      - git 
+      - tmux 
+      - make 
+      - cmake 
+      - node 
+      - npm       
       - curl
       - wget
       - htop
       - unzip
       - zip
       - go
+      - zig
+      - ripgrep
+      - python3       
+      - virtualenv    
+      - docker        
+      - docker-compose 
+      - neovim        
+      - fzf
+      - zsh
+      - lazygit
+      - jq
+      - nginx
+      - terraform
+      - openssl
+      - kubectl 
   tasks:
     - name: Install packages with apt on Ubuntu
       ansible.builtin.apt:
@@ -25,7 +40,7 @@
       when: ansible_distribution == "Ubuntu"
       register: package_result
     - name: Install common packages with brew on MacOS
-      homebrew:
+      ansible.builtin.homebrew:
         name: "{{ common_packages }}"
         state: present
       when: ansible_distribution == "MacOSX"

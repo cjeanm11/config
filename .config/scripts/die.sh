@@ -1,4 +1,6 @@
-die() die() {
+#!/bin/bash
+
+die() {
     if [ $# -ne 1 ]; then
         echo "Usage: $0 <port>"
     else

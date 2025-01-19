@@ -5,6 +5,8 @@
 
 declare -a directory_stack
 declare -a bookmarks
+shell_name=$(basename $SHELL)
+setopt KSH_ARRAYS 2>/dev/null
 
 # TAG --help: output brief documentation for how to invoke the program
 show_help() {
@@ -25,14 +27,14 @@ show_help() {
     echo "If no options or PATH is provided, fcd initiates fuzzy search to navigate interactively."
 }
 
-# OPTION -pu : Push the current directory onto the stack
+# OPTION -pu: Push the current directory onto the stack
 pushd() {
     local absolute_path="$(realpath "$PWD")"
     directory_stack+=("$absolute_path")
     cd "$1"
 }
 
-# OPTION -pp : Pop the top directory from the stack and navigate to it
+# OPTION -pp: Pop the top directory from the stack and navigate to it
 popd() {
     if [[ ${#directory_stack[@]} -gt 0 ]]; then
         local target_dir="${directory_stack[-1]}"
@@ -43,7 +45,7 @@ popd() {
     fi
 }
 
-# fzf-cd : Main function
+# fzf-cd: Main function
 fcd() {
     # Parse command line options
     if [[ "$1" == "--help" || "$1" == "--h" ]]; then
@@ -79,7 +81,6 @@ fcd() {
             echo "Directory stack is empty or an error occurred while popping."
         fi
     else
-        # default to cd if path is provided
         if [[ -n "$1" ]]; then
             cd "$1"
         else
@@ -99,7 +100,6 @@ fcd() {
 add_bookmark() {
     local target_dir="$1"
 
-    # If target_dir is not provided, use the current directory (pwd)
     if [[ -z "$target_dir" ]]; then
         target_dir="$(pwd)"
     fi
@@ -119,11 +119,7 @@ add_bookmark() {
     bookmarks+=("$absolute_path")
     echo "Added $absolute_path to bookmarks."
 
-    # TODO sanitize, check
-    local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
-    shell_name="${shell_name#-}"
-    bm_to_add="fcd -a \"$absolute_path\" 1> /dev/null"
-    echo "${shell_name}"
+    bm_to_add="fcd -a \"${absolute_path}\" 1>/dev/null"
     if ! grep "$bm_to_add" ~/.${shell_name}rc; then
         {
             chmod +w ~/.${shell_name}rc
@@ -144,20 +140,18 @@ list_bookmarks() {
 
     echo "Bookmarked Directories:"
     for ((i = 0; i < $bookmark_count; i++)); do
-        local bookmarked_dir="${bookmarks[i+1]}"
+        local bookmarked_dir="${bookmarks[i]}"
 
         if [[ -d "$bookmarked_dir" ]]; then
-            echo "  [$((i + 1))] - $bookmarked_dir"
+            echo "  [$((i))] - $bookmarked_dir"
         else
-            # TODO if path happens to be invalid remove them from bm list and rc file.
-            echo "  [$((i + 1))] - $bookmarked_dir (Invalid path)"
+            echo "  [$((i))] - $bookmarked_dir (Invalid path)"
         fi
     done
 }
 
 
 # OPTION -r: Remove a directory from bookmarks
-# TODO remove as bookmark number instead of paths
 remove_bookmark() {
     local target_dir="$1"
     local absolute_path=$(realpath "$target_dir" 2>/dev/null)
@@ -173,8 +167,6 @@ remove_bookmark() {
         echo "Directory $absolute_path is not a bookmark."
     else
         bookmarks=("${new_bookmarks[@]}")
-        local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
-        shell_name="${shell_name#-}"
         bm_to_remove="fcd -a \"$absolute_path\""
         if grep "$bm_to_remove" ~/.${shell_name}rc 1>/dev/null; then
             {
@@ -194,10 +186,10 @@ remove_bookmark() {
 
 # OPTION -g: Go to bookmark path based on input (bookmark numbers)
 goto_bookmark() {
-    local choice="$1"  # Get the bookmark number from the second arg
+    local choice="$1"
 
     if [[ -z "$choice" ]]; then
-        list_bookmarks  # list bookmark numbers
+        list_bookmarks
         echo "Enter the number of the bookmarked path you want to navigate to: "
         read -r choice
     fi
@@ -208,15 +200,10 @@ goto_bookmark() {
         return 1
     fi
 
-    local index=$((choice - 1))
 
-    # Valid the index
-    if [[ $index -lt 0 || $index -ge ${#bookmarks[@]} ]]; then
-        echo "Invalid choice. Please select a valid bookmark number."
-        return 1
-    fi
+    local index=$((choice))
 
-    local selected_path="${bookmarks[index+1]}"
+    local selected_path="${bookmarks[index]}"
     selected_path=$(eval echo "$selected_path")
 
     if [[ ! -d "$selected_path" ]]; then
@@ -235,8 +222,6 @@ goto_bookmark() {
 remove_all_bookmarks() {
     local option="$1"
     bookmarks=()
-    local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
-    shell_name="${shell_name#-}"
 
     if [[ -f ~/.${shell_name}rc ]]; then
         {
@@ -252,29 +237,3 @@ remove_all_bookmarks() {
 
     echo "All bookmarks removed."
 }
-
-
-################# custom git functions ####################
-
-# Custom git clone : Change directory to git clone and then bookmark.
-alias git='__git_custom_clone() {
-    if [[ "$1" == "clone" ]]; then
-        local clone_args=("$@")
-        git clone "$2" &
-        wait
-        cd "$(basename "${clone_args[-1]}" .git)"
-        fcd -a
-        local shell_name=$(ps -p $$ | awk "NR==2{print \$NF}")
-        shell_name="${shell_name#-}"
-        bm_to_add="fcd -a \"$absolute_path\" 1> /dev/null"
-        if ! grep "$bm_to_add" ~/.${shell_name}rc; then
-            {
-                chmod +w ~/.${shell_name}rc
-                echo "$bm_to_add" >> ~/.${shell_name}rc
-                chmod -w ~/.${shell_name}rc
-            }
-        fi
-    else
-        command git "$@"
-    fi
-}; __git_custom_clone 1> /dev/null'

@@ -1,10 +1,11 @@
 #!/bin/bash
+
 function clear_ram() {
-	sudo echo 3 > sudo /proc/sys/vm/drop_caches
-	sleep 5
+    echo "Clearing RAM cache..."
+    echo 3 | sudo tee /proc/sys/vm/drop_caches > /dev/null
+    sleep 5
 }
 
-while :
-do
-	clear_ram
+while true; do
+    clear_ram
 done

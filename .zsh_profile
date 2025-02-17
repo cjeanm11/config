@@ -13,6 +13,36 @@ alias vi="vim"
 alias python="python3"
 alias py="python3"
 
+# Terraform
+alias ti='terraform init'
+alias tv='terraform validate'
+alias tp='terraform plan'
+alias ta='terraform apply -auto-approve'
+alias td='terraform destroy -auto-approve'
+alias ts='terraform state list'
+alias to='terraform output'
+alias tfmt='terraform fmt -recursive'
+alias tr='terraform refresh'
+
+# Kubernates
+alias k='kubectl'
+alias kga='kubectl get all'
+alias kgp='kubectl get pods'
+alias kgpw='kubectl get pods -o wide'
+alias kgs='kubectl get services'
+alias kgn='kubectl get nodes'
+alias kgd='kubectl get deployments'
+alias kdp='kubectl describe pod'
+alias ka='kubectl apply -f'
+alias kd='kubectl delete'
+alias krun='kubectl run --rm -it --image=alpine debug -- sh'
+alias kl='kubectl logs'
+alias ke='kubectl exec -it'
+alias kgns='kubectl get namespaces'
+alias kctx='kubectl config use-context'
+alias kpf='kubectl port-forward'
+kpods() { kubectl get pods --namespace $1 -o wide; }
+
 addToPath() {
     if [[ "$PATH" != *"$1"* ]]; then
         export PATH=$PATH:$1
@@ -23,14 +53,6 @@ addToPathFront() {
     if [[ "$PATH" != *"$1"* ]]; then
         export PATH=$1:$PATH
     fi
-}
-
-catr() {
-    tail -n "+$1" $3 | head -n "$(($2 - $1 + 1))"
-}
-
-cat1Line() {
-    cat $1 | tr -d "\n"
 }
 
 validateYaml() {
@@ -51,4 +73,3 @@ addToPath $HOME/.rustup
 source ~/.config/scripts/fzf-cd.sh
 source ~/.config/scripts/os_setup.sh
 source ~/.config/scripts/die.sh
-source ~/.config/scripts/clear_ram.sh

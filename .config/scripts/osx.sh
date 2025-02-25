@@ -71,7 +71,7 @@ defaults write com.apple.finder CreateDesktop -bool false
 defaults write com.apple.dock tilesize -int 45
 defaults write com.apple.dock expose-animation-duration -float 0.15
 defaults write com.apple.dock showhidden -bool true
-defaults write com.apple.dock autohide -bool true
+defaults write com.apple.dock autohide -bool false
 
 # Disable hot corners
 defaults write com.apple.dock wvous-br-corner -int 0

@@ -14,6 +14,7 @@ alias python="python3"
 alias py="python3"
 
 # Terraform
+alias t='terraform'
 alias ti='terraform init'
 alias tv='terraform validate'
 alias tp='terraform plan'
